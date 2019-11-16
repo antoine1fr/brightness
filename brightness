@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DRIVER_DIR="/sys/class/backlight/intel_backlight"
+
+get_brightness() {
+  cat "$DRIVER_DIR/brightness"
+}
+
+set_brightness() {
+  local brightness=$1
+  echo $brightness > "$DRIVER_DIR/brightness"
+}
+
+increment_brightness() {
+  local current_brightness=$(get_brightness)
+  local new_brightness=$(($current_brightness + 10))
+  set_brightness $new_brightness
+}
+
+decrement_brightness() {
+  local current_brightness=$(get_brightness)
+  local new_brightness=$(($current_brightness - 10))
+  set_brightness $new_brightness
+}
+
+double_brightness() {
+  local current_brightness=$(get_brightness)
+  local new_brightness=$(($current_brightness * 2))
+  set_brightness $new_brightness
+}
+
+halve_brightness() {
+  local current_brightness=$(get_brightness)
+  local new_brightness=$(($current_brightness / 2))
+  set_brightness $new_brightness
+}
+
+print_help() {
+  echo "Usage: brightness (get|set|increment|decrement|halve|double|help)"
+}
+
+if [ "$#" -ge 1 ]; then
+  case "$1" in
+    get)
+      get_brightness
+      ;;
+    set)
+      set_brightness $2
+      ;;
+    increment)
+      increment_brightness
+      ;;
+    decrement)
+      decrement_brightness
+      ;;
+    halve)
+      halve_brightness
+      ;;
+    double)
+      double_brightness
+      ;;
+    help)
+      print_help
+      ;;
+    *)
+      echo "Unknown command" > /dev/stderr
+      print_help
+      exit 1
+      ;;
+  esac
+else
+  echo "Unknown command" > /dev/stderr
+  print_help
+  exit 1
+fi
